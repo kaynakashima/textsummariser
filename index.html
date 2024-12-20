@@ -1,10 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <title>Title</title>
 </head>
 <body>
-$END$
+
+    <h1>PDF Summarizer</h1>
+    <form action="http://localhost:8000/summarize" method="post" enctype="multipart/form-data">
+      <input type="file" name="file" accept="application/pdf">
+      <input type="submit" value="Summarize">
+    </form>
+
 </body>
 </html>
