@@ -1,61 +1,25 @@
-import spacy
+import fitz
+from transformers import pipeline
+from huggingface_hub import login
 
-nlp = spacy.load("en_core_web_sm")
+# Load a summarization model using Hugging Face's Inference API
+summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
 
-text = """
-Amazon's delivery estimates are based on various factors, including shipping speed, item availability, 
-and your location. While Amazon Prime members often experience faster shipping times, it's not uncommon 
-for packages to arrive earlier than the estimated delivery date. However, this isn't guaranteed, as delivery 
-times can vary due to factors like carrier schedules and unforeseen delays.
-"""
+# Authenticate with hugging face token
+token = "YOUR_TOKEN_HERE"
+login(token=token)
 
-#processesing the word data
+try:
+    # Opening pdf file using PyMuPDF
+    doc = fitz.open("Certificate of Matriculation.pdf")
+    ARTICLE = ""
+    for page in doc:
+        text = page.get_text()
+        ARTICLE += text
 
-doc = nlp(text=text)
-
-word_dict = {}
-
-for word in doc:
-    word = word.text.lower()
-
-    if word in word_dict:
-        word_dict[word] += 1
-    else:
-        word_dict[word] = 1
-
-#print (word_dict)
-
-#scoring sentences
-
-#(index, sentence, score)
-sentences = []
-
-sentence_score = 0
-
-for i, sentence in enumerate(doc.sents):
-    for word in sentence:
-        word = word.text.lower()
-        sentence_score += word_dict[word]
-
-    sentences.append((1, sentence.text.replace("\n",""), sentence_score/len(sentence)))
-
-#print(sentences)
-
-#sorting the sentences
-sorted_sentence = sorted(sentences, key=lambda x: -x[2])
-
-top_three = sorted(sorted_sentence[:3], key=lambda x: x[0])
-
-summary_text = ""
-
-for sentence in top_three:
-    summary_text += sentence[1] + ""
-
-print(summary_text)
-
-
-
-
-
-
-
+    # Using the summariser to generate a summary and print it out
+    print(summarizer(ARTICLE, max_length=100, min_length=30, do_sample=False))
+except FileNotFoundError:
+    print("Error: PDF file not found.")
+except Exception as e:
+    print(f"An error occurred: {e}")
